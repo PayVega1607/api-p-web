@@ -58,8 +58,13 @@ app.post("/articulos", async (req, res) => {
 app.put("/articulos/:id", async (req, res) => {
     try {
         const { titulo, valor, existencias } = req.body;
+
+        if (!req.body || Object.keys(req.body).length === 0) {
+            return res.status(400).json({ error: "El cuerpo de la petición no puede estar vacío" });
+        }
+
         if (!titulo || valor === undefined || existencias === undefined) {
-            return res.status(400).json({ error: "Datos incompletos: titulo, valor y existencias son requeridos" });
+            return res.status(400).json({ error: "Datos incompletos: titulo, valor y existencias son requeridos para PUT" });
         }
 
         const [resultado] = await db.query(
@@ -81,6 +86,15 @@ app.patch("/articulos/:id", async (req, res) => {
     try {
         const { titulo, valor, existencias } = req.body;
         
+        // Validar si el body está vacío
+        if (!req.body || Object.keys(req.body).length === 0) {
+            return res.status(400).json({ error: "El cuerpo de la petición no puede estar vacío" });
+        }
+
+        if (titulo === undefined && valor === undefined && existencias === undefined) {
+            return res.status(400).json({ error: "Debes enviar al menos un campo válido para actualizar" });
+        }
+
         const [filas] = await db.query("SELECT * FROM productos WHERE id = ?", [req.params.id]);
         if (filas.length === 0) {
             return res.status(404).json({ error: "Artículo no encontrado" });
